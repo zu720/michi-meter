@@ -132,6 +132,26 @@
       opacity: 0.9;
     }
 
+    .amount-badge {
+      background: #10b981;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+
+    .payer-badge {
+      background: #f59e0b;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+
     .add-section {
       background: white;
       border-radius: 20px;
@@ -295,6 +315,8 @@
       const [drinks, setDrinks] = useState([]);
       const [location, setLocation] = useState('');
       const [people, setPeople] = useState('');
+      const [amount, setAmount] = useState('');
+      const [payer, setPayer] = useState('');
 
       useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -315,18 +337,23 @@
           id: Date.now(),
           date: new Date().toLocaleDateString('ja-JP'),
           location: location.trim(),
-          people: people.trim()
+          people: people.trim(),
+          amount: amount ? parseInt(amount) : 0,
+          payer: payer.trim()
         };
 
         setDrinks([newDrink, ...drinks]);
         setLocation('');
         setPeople('');
+        setAmount('');
+        setPayer('');
       };
 
       const deleteDrink = (id) => {
         setDrinks(drinks.filter(drink => drink.id !== id));
       };
 
+      const totalAmount = drinks.reduce((sum, drink) => sum + (drink.amount || 0), 0);
       const progress = (drinks.length / MAX_DRINKS) * 100;
       const isComplete = drinks.length >= MAX_DRINKS;
 
@@ -354,6 +381,10 @@
               <div className="stat-card">
                 <div className="stat-number">{MAX_DRINKS - drinks.length}</div>
                 <div className="stat-label">残り回数</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-number">¥{totalAmount.toLocaleString()}</div>
+                <div className="stat-label">総額</div>
               </div>
               <div className="stat-card">
                 <div className="stat-number">{Math.round(progress)}%</div>
@@ -392,6 +423,25 @@
                     required
                   />
                 </div>
+                <div className="form-group">
+                  <label>金額（円）</label>
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="例：5000"
+                    min="0"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>精算者（ごとうへの支払い）</label>
+                  <input
+                    type="text"
+                    value={payer}
+                    onChange={(e) => setPayer(e.target.value)}
+                    placeholder="例：ごとう"
+                  />
+                </div>
                 <button type="submit" className="btn">
                   🍺 記録する（残り{MAX_DRINKS - drinks.length}回）
                 </button>
@@ -414,6 +464,12 @@
                     </div>
                     <div className="history-details">
                       📍 {drink.location}
+                      {drink.amount > 0 && (
+                        <span className="amount-badge">¥{drink.amount.toLocaleString()}</span>
+                      )}
+                      {drink.payer && (
+                        <span className="payer-badge">💰 {drink.payer}</span>
+                      )}
                     </div>
                     <div className="history-people">
                       👥 {drink.people}
@@ -437,3 +493,4 @@
   </script>
 </body>
 </html>
+
