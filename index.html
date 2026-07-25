@@ -430,6 +430,69 @@
       to { opacity: 1; transform: translate(-50%, 0); }
     }
 
+    /* --- party list / history --- */
+    .autosave-note {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 0.82rem;
+      margin: -10px 0 18px;
+    }
+
+    .back-btn {
+      margin-bottom: 16px;
+      padding: 9px 16px;
+    }
+
+    .party-date {
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    .party-list {
+      list-style: none;
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .party-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f9fafb;
+      padding: 14px;
+      border-radius: 12px;
+      border-left: 4px solid #6366f1;
+    }
+
+    .party-main {
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .party-title {
+      font-weight: 700;
+      color: #111827;
+      font-size: 1.05rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .party-sub {
+      color: #6b7280;
+      font-size: 0.85rem;
+      margin-top: 3px;
+    }
+
+    .party-open {
+      flex: 0 0 auto;
+      padding: 8px 16px;
+    }
+
     @media (max-width: 560px) {
       .header h1 { font-size: 2.1rem; }
       .card { padding: 20px; }
@@ -447,6 +510,8 @@
     const STORAGE_KEY = 'nomikai-warikan-data';
 
     const yen = (n) => '¥' + Math.round(n).toLocaleString('ja-JP');
+
+    const todayStr = () => new Date().toLocaleDateString('ja-JP');
 
     // 支払いを対象メンバーに整数で配分（最大剰余法で1円単位まで合わせる）
     function allocate(amount, participants) {
@@ -517,9 +582,8 @@
     }
 
     function WarikanApp() {
-      const [members, setMembers] = useState([]);
-      const [expenses, setExpenses] = useState([]);
-      const [useWeights, setUseWeights] = useState(false);
+      const [parties, setParties] = useState([]);
+      const [activeId, setActiveId] = useState(null);
       const [loaded, setLoaded] = useState(false);
 
       // 入力フォーム
@@ -531,30 +595,51 @@
       const [toast, setToast] = useState('');
       const toastTimer = useRef(null);
 
-      // 読み込み
+      // 読み込み（旧フォーマットからの移行も対応）
       useEffect(() => {
         try {
-          const saved = localStorage.getItem(STORAGE_KEY);
-          if (saved) {
-            const data = JSON.parse(saved);
-            setMembers(data.members || []);
-            setExpenses(data.expenses || []);
-            setUseWeights(!!data.useWeights);
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const data = JSON.parse(raw);
+            if (Array.isArray(data.parties)) {
+              setParties(data.parties);
+              const ok = data.activeId && data.parties.some((p) => p.id === data.activeId);
+              setActiveId(ok ? data.activeId : null);
+            } else if (data.members || data.expenses) {
+              // 旧：単一セッション形式 → 1件の飲み会として移行
+              const migrated = {
+                id: 'p' + Date.now(),
+                title: '',
+                date: todayStr(),
+                members: data.members || [],
+                expenses: data.expenses || [],
+                useWeights: !!data.useWeights,
+              };
+              setParties([migrated]);
+              setActiveId(migrated.id);
+            }
           }
         } catch (e) { /* ignore */ }
         setLoaded(true);
       }, []);
 
-      // 保存
+      // 保存（変更のたびに自動保存）
       useEffect(() => {
         if (!loaded) return;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ members, expenses, useWeights }));
-      }, [members, expenses, useWeights, loaded]);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ parties, activeId }));
+      }, [parties, activeId, loaded]);
 
-      // 対象メンバーの初期選択はメンバー全員
+      const active = parties.find((p) => p.id === activeId) || null;
+
+      // 飲み会を切り替えたらフォームを初期化
       useEffect(() => {
-        setSelected(members.map((m) => m.id));
-      }, [members]);
+        setSelected(active ? active.members.map((m) => m.id) : []);
+        setPayerId('');
+        setAmount('');
+        setDescription('');
+        setMemberName('');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [activeId]);
 
       const showToast = (msg) => {
         setToast(msg);
@@ -562,48 +647,85 @@
         toastTimer.current = setTimeout(() => setToast(''), 2000);
       };
 
+      // アクティブな飲み会を更新
+      const updateActive = (patch) => {
+        setParties((prev) =>
+          prev.map((p) =>
+            p.id === activeId ? { ...p, ...(typeof patch === 'function' ? patch(p) : patch) } : p
+          )
+        );
+      };
+
+      // --- 飲み会（一覧）操作 ---
+      const createParty = () => {
+        const np = {
+          id: 'p' + Date.now(),
+          title: '',
+          date: todayStr(),
+          members: [],
+          expenses: [],
+          useWeights: false,
+        };
+        setParties((prev) => [np, ...prev]);
+        setActiveId(np.id);
+      };
+
+      const openParty = (id) => setActiveId(id);
+      const backToList = () => setActiveId(null);
+
+      const deleteParty = (id, fromEditor) => {
+        const p = parties.find((x) => x.id === id);
+        const name = (p && p.title) || '無題の飲み会';
+        if (!window.confirm('「' + name + '」を削除します。よろしいですか？')) return;
+        setParties((prev) => prev.filter((x) => x.id !== id));
+        if (activeId === id) setActiveId(null);
+      };
+
+      // --- メンバー操作 ---
       const addMember = (e) => {
         e.preventDefault();
         const name = memberName.trim();
-        if (!name) return;
-        if (members.some((m) => m.name === name)) {
+        if (!name || !active) return;
+        if (active.members.some((m) => m.name === name)) {
           showToast('同じ名前のメンバーがいます');
           return;
         }
-        const newMember = { id: 'm' + Date.now(), name, weight: 1 };
-        setMembers([...members, newMember]);
+        const nm = { id: 'm' + Date.now(), name, weight: 1 };
+        updateActive((p) => ({ members: [...p.members, nm] }));
+        setSelected((prev) => [...prev, nm.id]);
         setMemberName('');
       };
 
       const removeMember = (id) => {
-        setMembers(members.filter((m) => m.id !== id));
-        // 支払者だった記録は削除、対象からは除外
-        setExpenses(
-          expenses
+        updateActive((p) => ({
+          members: p.members.filter((m) => m.id !== id),
+          expenses: p.expenses
             .filter((exp) => exp.payerId !== id)
             .map((exp) => ({
               ...exp,
               participantIds: exp.participantIds.filter((pid) => pid !== id),
-            }))
-        );
+            })),
+        }));
+        setSelected((prev) => prev.filter((x) => x !== id));
         if (payerId === id) setPayerId('');
       };
 
       const setWeight = (id, value) => {
         const w = parseFloat(value);
-        setMembers(members.map((m) => (m.id === id ? { ...m, weight: isNaN(w) ? 0 : w } : m)));
+        updateActive((p) => ({
+          members: p.members.map((m) => (m.id === id ? { ...m, weight: isNaN(w) ? 0 : w } : m)),
+        }));
       };
 
       const toggleSelected = (id) => {
-        setSelected((prev) =>
-          prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-        );
+        setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
       };
 
+      // --- 支払い操作 ---
       const addExpense = (e) => {
         e.preventDefault();
         const amt = parseInt(amount, 10);
-        if (!payerId || !amt || amt <= 0 || selected.length === 0) return;
+        if (!active || !payerId || !amt || amt <= 0 || selected.length === 0) return;
         const newExpense = {
           id: 'e' + Date.now(),
           payerId,
@@ -611,40 +733,38 @@
           description: description.trim(),
           participantIds: [...selected],
         };
-        setExpenses([newExpense, ...expenses]);
+        updateActive((p) => ({ expenses: [newExpense, ...p.expenses] }));
         setAmount('');
         setDescription('');
-        setSelected(members.map((m) => m.id));
+        setSelected(active.members.map((m) => m.id));
       };
 
       const removeExpense = (id) => {
-        setExpenses(expenses.filter((exp) => exp.id !== id));
-      };
-
-      const resetAll = () => {
-        if (window.confirm('すべてのメンバーと支払い記録を削除します。よろしいですか？')) {
-          setMembers([]);
-          setExpenses([]);
-          setUseWeights(false);
-        }
+        updateActive((p) => ({ expenses: p.expenses.filter((exp) => exp.id !== id) }));
       };
 
       const memberName_ = (id) => {
-        const m = members.find((mm) => mm.id === id);
+        if (!active) return '';
+        const m = active.members.find((mm) => mm.id === id);
         return m ? m.name : '（削除済み）';
       };
 
       const result = useMemo(
-        () => computeSettlement(members, expenses, useWeights),
-        [members, expenses, useWeights]
+        () =>
+          active
+            ? computeSettlement(active.members, active.expenses, active.useWeights)
+            : { balances: [], transfers: [], total: 0 },
+        [active]
       );
 
-      const perPerson = members.length > 0 ? result.total / members.length : 0;
+      const perPerson =
+        active && active.members.length > 0 ? result.total / active.members.length : 0;
 
       const copyResult = () => {
+        if (!active) return;
         const lines = [];
-        lines.push('🍻 飲み会の精算');
-        lines.push('合計 ' + yen(result.total) + '（' + members.length + '人）');
+        lines.push('🍻 ' + (active.title || '飲み会') + ' の精算');
+        lines.push('合計 ' + yen(result.total) + '（' + active.members.length + '人）');
         lines.push('');
         if (result.transfers.length === 0) {
           lines.push('精算不要（差額なし）');
@@ -668,18 +788,88 @@
         }
       };
 
-      const canAddExpense = payerId && parseInt(amount, 10) > 0 && selected.length > 0;
+      const canAddExpense = active && payerId && parseInt(amount, 10) > 0 && selected.length > 0;
 
+      // ============ 一覧ビュー ============
+      if (!active) {
+        return (
+          <div className="container">
+            <div className="header">
+              <h1>🍻 わりかん</h1>
+              <p>飲み会の支払いを記録して、かんたん精算</p>
+            </div>
+
+            <div className="card">
+              <h2>📚 保存した飲み会 <span className="count">{parties.length}件</span></h2>
+              <button className="btn btn-block" onClick={createParty}>
+                ＋ 新しい飲み会をはじめる
+              </button>
+
+              {parties.length === 0 ? (
+                <div className="empty-state">
+                  まだ保存された飲み会はありません。<br />
+                  上のボタンから最初の飲み会をつくりましょう！
+                </div>
+              ) : (
+                <ul className="party-list">
+                  {parties.map((p) => {
+                    const total = p.expenses.reduce((s, e) => s + e.amount, 0);
+                    return (
+                      <li key={p.id} className="party-item">
+                        <div className="party-main" onClick={() => openParty(p.id)}>
+                          <div className="party-title">{p.title || '無題の飲み会'}</div>
+                          <div className="party-sub">
+                            📅 {p.date} ・ 👥 {p.members.length}人 ・ 合計 {yen(total)}
+                          </div>
+                        </div>
+                        <button className="btn btn-ghost party-open" onClick={() => openParty(p.id)}>
+                          開く
+                        </button>
+                        <button
+                          className="icon-btn"
+                          onClick={() => deleteParty(p.id)}
+                          title="削除"
+                          aria-label="この飲み会を削除"
+                        >
+                          ×
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      // ============ 編集ビュー ============
       return (
         <div className="container">
           <div className="header">
             <h1>🍻 わりかん</h1>
             <p>飲み会の支払いを記録して、かんたん精算</p>
           </div>
+          <div className="autosave-note">✓ 変更は自動で保存されます</div>
+
+          {/* 会の情報 */}
+          <div className="card">
+            <button className="btn btn-ghost back-btn" onClick={backToList}>
+              ← 一覧へ
+            </button>
+            <label>会の名前</label>
+            <input
+              type="text"
+              value={active.title}
+              onChange={(e) => updateActive({ title: e.target.value })}
+              placeholder="例：歓迎会・忘年会"
+            />
+            <div className="party-date">📅 {active.date}</div>
+          </div>
 
           {/* メンバー */}
           <div className="card">
-            <h2>👥 メンバー <span className="count">{members.length}人</span></h2>
+            <h2>👥 メンバー <span className="count">{active.members.length}人</span></h2>
             <form onSubmit={addMember}>
               <div className="row">
                 <input
@@ -695,14 +885,14 @@
               </div>
             </form>
 
-            {members.length === 0 ? (
+            {active.members.length === 0 ? (
               <div className="empty-state">まずは参加メンバーを追加しましょう</div>
             ) : (
               <ul className="member-list">
-                {members.map((m) => (
+                {active.members.map((m) => (
                   <li key={m.id} className="member-item">
                     <span className="member-name">{m.name}</span>
-                    {useWeights && (
+                    {active.useWeights && (
                       <React.Fragment>
                         <input
                           className="weight"
@@ -729,12 +919,12 @@
               </ul>
             )}
 
-            {members.length > 0 && (
+            {active.members.length > 0 && (
               <label className="toggle-line">
                 <input
                   type="checkbox"
-                  checked={useWeights}
-                  onChange={(e) => setUseWeights(e.target.checked)}
+                  checked={active.useWeights}
+                  onChange={(e) => updateActive({ useWeights: e.target.checked })}
                 />
                 傾斜配分を使う（上司は多め・幹事は少なめ など）
               </label>
@@ -742,7 +932,7 @@
           </div>
 
           {/* 支払い */}
-          {members.length > 0 && (
+          {active.members.length > 0 && (
             <div className="card">
               <h2>💴 支払いを追加</h2>
               <form onSubmit={addExpense}>
@@ -750,7 +940,7 @@
                   <label>誰が払った？</label>
                   <select value={payerId} onChange={(e) => setPayerId(e.target.value)}>
                     <option value="">選択してください</option>
-                    {members.map((m) => (
+                    {active.members.map((m) => (
                       <option key={m.id} value={m.id}>{m.name}</option>
                     ))}
                   </select>
@@ -784,7 +974,7 @@
                       type="button"
                       className="chip-mini"
                       style={{ marginLeft: 10 }}
-                      onClick={() => setSelected(members.map((m) => m.id))}
+                      onClick={() => setSelected(active.members.map((m) => m.id))}
                     >
                       全員
                     </button>
@@ -797,7 +987,7 @@
                     </button>
                   </label>
                   <div className="chips">
-                    {members.map((m) => (
+                    {active.members.map((m) => (
                       <span
                         key={m.id}
                         className={'chip' + (selected.includes(m.id) ? ' on' : '')}
@@ -813,9 +1003,9 @@
                 </button>
               </form>
 
-              {expenses.length > 0 && (
+              {active.expenses.length > 0 && (
                 <ul className="expense-list">
-                  {expenses.map((exp) => (
+                  {active.expenses.map((exp) => (
                     <li key={exp.id} className="expense-item">
                       <div className="expense-main">
                         <div className="expense-title">
@@ -824,7 +1014,7 @@
                         </div>
                         <div className="expense-sub">
                           💳 {memberName_(exp.payerId)} が支払い ／ 対象{' '}
-                          {exp.participantIds.length === members.length
+                          {exp.participantIds.length === active.members.length
                             ? '全員'
                             : exp.participantIds.map(memberName_).join('・')}
                         </div>
@@ -845,7 +1035,7 @@
           )}
 
           {/* 精算結果 */}
-          {members.length > 0 && expenses.length > 0 && (
+          {active.members.length > 0 && active.expenses.length > 0 && (
             <div className="card">
               <h2>🧮 精算結果</h2>
               <div className="summary">
@@ -854,7 +1044,7 @@
                   <div className="summary-label">合計金額</div>
                 </div>
                 <div className="summary-card">
-                  <div className="summary-num">{members.length}人</div>
+                  <div className="summary-num">{active.members.length}人</div>
                   <div className="summary-label">参加人数</div>
                 </div>
                 <div className="summary-card">
@@ -908,14 +1098,12 @@
             </div>
           )}
 
-          {/* リセット */}
-          {(members.length > 0 || expenses.length > 0) && (
-            <div className="footer-actions">
-              <button className="btn btn-ghost btn-block" onClick={resetAll}>
-                🗑 すべてリセット
-              </button>
-            </div>
-          )}
+          {/* この飲み会を削除 */}
+          <div className="footer-actions">
+            <button className="btn btn-ghost btn-block" onClick={() => deleteParty(active.id)}>
+              🗑 この飲み会を削除
+            </button>
+          </div>
 
           {toast && <div className="toast">{toast}</div>}
         </div>
