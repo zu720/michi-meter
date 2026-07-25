@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Michi Meter - ハノイまでの道のり</title>
+  <title>わりかん - 飲み会精算アプリ</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
@@ -15,290 +15,489 @@
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', Meiryo, sans-serif;
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
       min-height: 100vh;
       padding: 20px;
+      color: #1f2937;
     }
 
     .container {
-      max-width: 800px;
+      max-width: 760px;
       margin: 0 auto;
     }
 
     .header {
       text-align: center;
       color: white;
-      margin-bottom: 30px;
+      margin-bottom: 26px;
     }
 
     .header h1 {
-      font-size: 3rem;
-      margin-bottom: 10px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      font-size: 2.6rem;
+      margin-bottom: 8px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.25);
     }
 
     .header p {
-      font-size: 1.2rem;
-      opacity: 0.9;
+      font-size: 1.05rem;
+      opacity: 0.92;
     }
 
-    .progress-section {
+    .card {
       background: white;
-      border-radius: 20px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      border-radius: 18px;
+      padding: 26px;
+      margin-bottom: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
     }
 
-    .journey {
-      position: relative;
-      height: 120px;
-      background: linear-gradient(to right, #e0f2fe 0%, #fef3c7 100%);
-      border-radius: 15px;
-      overflow: hidden;
-      margin: 20px 0;
+    .card h2 {
+      color: #111827;
+      margin-bottom: 18px;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .journey-path {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: #94a3b8;
-      transform: translateY(-50%);
-    }
-
-    .journey-progress {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      height: 6px;
-      background: linear-gradient(to right, #f59e0b, #ef4444);
-      transform: translateY(-50%);
-      transition: width 0.5s ease;
-      box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
-    }
-
-    .location {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      text-align: center;
-      font-size: 2rem;
-    }
-
-    .location-tokyo {
-      left: 10px;
-    }
-
-    .location-hanoi {
-      right: 10px;
-    }
-
-    .airplane {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 2.5rem;
-      transition: left 0.5s ease;
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    .stat-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 15px;
-      text-align: center;
-    }
-
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    .stat-label {
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
-
-    .amount-badge {
-      background: #10b981;
-      color: white;
-      padding: 3px 8px;
-      border-radius: 5px;
+    .card h2 .count {
+      margin-left: auto;
       font-size: 0.85rem;
-      font-weight: bold;
-      margin-left: 8px;
+      font-weight: 600;
+      color: #6b7280;
+      background: #f3f4f6;
+      padding: 3px 10px;
+      border-radius: 999px;
     }
 
-    .payer-badge {
-      background: #f59e0b;
-      color: white;
-      padding: 3px 8px;
-      border-radius: 5px;
-      font-size: 0.85rem;
-      font-weight: bold;
-      margin-left: 8px;
-    }
-
-    .add-section {
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-
-    .add-section h2 {
-      color: #1f2937;
-      margin-bottom: 20px;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
+    label {
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
       color: #4b5563;
-      font-weight: 500;
+      font-weight: 600;
+      font-size: 0.92rem;
     }
 
-    .form-group input {
+    input, select {
       width: 100%;
       padding: 12px;
       border: 2px solid #e5e7eb;
       border-radius: 10px;
       font-size: 1rem;
-      transition: border-color 0.3s;
+      transition: border-color 0.2s;
+      background: white;
+      color: #1f2937;
     }
 
-    .form-group input:focus {
+    input:focus, select:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: #6366f1;
     }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row > * { flex: 1; }
+
+    .form-group { margin-bottom: 14px; }
 
     .btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
       color: white;
       border: none;
-      padding: 15px 30px;
+      padding: 13px 22px;
       border-radius: 10px;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: bold;
       cursor: pointer;
-      width: 100%;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
     }
 
-    .btn:hover {
+    .btn:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+      box-shadow: 0 6px 18px rgba(99, 102, 241, 0.55);
     }
 
     .btn:disabled {
-      opacity: 0.5;
+      opacity: 0.45;
       cursor: not-allowed;
-      transform: none;
     }
 
-    .history-section {
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    .btn-block { width: 100%; }
+
+    .btn-add {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      padding: 12px 20px;
     }
 
-    .history-section h2 {
-      color: #1f2937;
-      margin-bottom: 20px;
-    }
-
-    .history-list {
-      list-style: none;
-    }
-
-    .history-item {
-      background: #f9fafb;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      border-left: 4px solid #667eea;
-      transition: transform 0.2s;
-    }
-
-    .history-item:hover {
-      transform: translateX(5px);
-    }
-
-    .history-date {
-      color: #6b7280;
-      font-size: 0.9rem;
-      margin-bottom: 5px;
-    }
-
-    .history-details {
-      color: #1f2937;
-      font-weight: 500;
-    }
-
-    .history-people {
+    .btn-ghost {
+      background: #f3f4f6;
       color: #4b5563;
-      font-size: 0.9rem;
-      margin-top: 5px;
+      box-shadow: none;
     }
 
-    .delete-btn {
-      background: #ef4444;
-      color: white;
+    .btn-ghost:hover:not(:disabled) {
+      background: #e5e7eb;
+      box-shadow: none;
+    }
+
+    /* --- members --- */
+    .member-list {
+      list-style: none;
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .member-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f9fafb;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border-left: 4px solid #6366f1;
+    }
+
+    .member-name {
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .member-item input.weight {
+      width: 78px;
+      flex: 0 0 auto;
+      padding: 7px 8px;
+      font-size: 0.9rem;
+    }
+
+    .weight-suffix {
+      font-size: 0.85rem;
+      color: #6b7280;
+      flex: 0 0 auto;
+    }
+
+    .icon-btn {
+      background: #fee2e2;
+      color: #dc2626;
       border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 0.8rem;
-      margin-left: 10px;
+      font-size: 1rem;
+      line-height: 1;
+      flex: 0 0 auto;
       transition: background 0.2s;
     }
 
-    .delete-btn:hover {
-      background: #dc2626;
+    .icon-btn:hover { background: #fecaca; }
+
+    .toggle-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      font-size: 0.92rem;
+      color: #4b5563;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-line input { width: auto; }
+
+    /* --- participants selector --- */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .chip {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 2px solid #e5e7eb;
+      background: white;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #6b7280;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .chip.on {
+      background: #eef2ff;
+      border-color: #6366f1;
+      color: #4338ca;
+    }
+
+    .chip-mini {
+      font-size: 0.82rem;
+      color: #6366f1;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      padding: 4px 2px;
+    }
+
+    /* --- expense list --- */
+    .expense-list {
+      list-style: none;
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .expense-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f9fafb;
+      padding: 14px;
+      border-radius: 12px;
+      border-left: 4px solid #a855f7;
+    }
+
+    .expense-main { flex: 1; min-width: 0; }
+
+    .expense-title {
+      font-weight: 700;
+      color: #111827;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .expense-amount {
+      background: #10b981;
+      color: white;
+      padding: 2px 9px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .expense-sub {
+      color: #6b7280;
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    /* --- results --- */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .summary-card {
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      color: white;
+      padding: 16px 10px;
+      border-radius: 14px;
+      text-align: center;
+    }
+
+    .summary-num {
+      font-size: 1.7rem;
+      font-weight: bold;
+      margin-bottom: 2px;
+      line-height: 1.2;
+    }
+
+    .summary-label {
+      font-size: 0.78rem;
+      opacity: 0.9;
+    }
+
+    .balance-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 22px;
+      font-size: 0.92rem;
+    }
+
+    .balance-table th, .balance-table td {
+      padding: 10px 8px;
+      text-align: right;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .balance-table th {
+      color: #6b7280;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .balance-table th:first-child,
+    .balance-table td:first-child {
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .net-plus { color: #059669; font-weight: 700; }
+    .net-minus { color: #dc2626; font-weight: 700; }
+    .net-zero { color: #9ca3af; }
+
+    .settle-title {
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settle-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .settle-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      color: #92400e;
+    }
+
+    .settle-from { color: #b45309; }
+    .settle-arrow { font-size: 1.2rem; }
+    .settle-amount {
+      margin-left: auto;
+      font-size: 1.15rem;
+      font-weight: bold;
+      color: #78350f;
+    }
+
+    .settle-done {
+      text-align: center;
+      padding: 24px;
+      color: #059669;
+      font-weight: 600;
+      font-size: 1.05rem;
     }
 
     .empty-state {
       text-align: center;
       color: #9ca3af;
-      padding: 40px;
+      padding: 30px 10px;
       font-style: italic;
     }
 
-    .arrival-message {
-      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 15px;
-      text-align: center;
-      margin-top: 20px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      animation: pulse 2s infinite;
+    .footer-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
     }
 
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.02); }
+    .footer-actions .btn { flex: 1; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111827;
+      color: white;
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      z-index: 50;
+      animation: fadeUp 0.25s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translate(-50%, 10px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    /* --- party list / history --- */
+    .autosave-note {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 0.82rem;
+      margin: -10px 0 18px;
+    }
+
+    .back-btn {
+      margin-bottom: 16px;
+      padding: 9px 16px;
+    }
+
+    .party-date {
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    .party-list {
+      list-style: none;
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .party-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f9fafb;
+      padding: 14px;
+      border-radius: 12px;
+      border-left: 4px solid #6366f1;
+    }
+
+    .party-main {
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .party-title {
+      font-weight: 700;
+      color: #111827;
+      font-size: 1.05rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .party-sub {
+      color: #6b7280;
+      font-size: 0.85rem;
+      margin-top: 3px;
+    }
+
+    .party-open {
+      flex: 0 0 auto;
+      padding: 8px 16px;
+    }
+
+    @media (max-width: 560px) {
+      .header h1 { font-size: 2.1rem; }
+      .card { padding: 20px; }
+      .summary-num { font-size: 1.4rem; }
+      .balance-table { font-size: 0.85rem; }
     }
   </style>
 </head>
@@ -306,191 +505,612 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useMemo, useRef } = React;
 
-    const STORAGE_KEY = 'michi-meter-data';
-    const MAX_DRINKS = 25;
+    const STORAGE_KEY = 'nomikai-warikan-data';
 
-    function MichiMeter() {
-      const [drinks, setDrinks] = useState([]);
-      const [location, setLocation] = useState('');
-      const [people, setPeople] = useState('');
+    const yen = (n) => '¥' + Math.round(n).toLocaleString('ja-JP');
+
+    const todayStr = () => new Date().toLocaleDateString('ja-JP');
+
+    // 支払いを対象メンバーに整数で配分（最大剰余法で1円単位まで合わせる）
+    function allocate(amount, participants) {
+      const total = participants.reduce((s, p) => s + p.weight, 0);
+      if (total <= 0) return participants.map(() => 0);
+      const raw = participants.map((p) => (amount * p.weight) / total);
+      const base = raw.map((r) => Math.floor(r));
+      let remainder = amount - base.reduce((a, b) => a + b, 0);
+      const order = raw
+        .map((r, i) => ({ i, frac: r - Math.floor(r) }))
+        .sort((a, b) => b.frac - a.frac || a.i - b.i);
+      const alloc = base.slice();
+      for (let k = 0; k < remainder; k++) alloc[order[k].i] += 1;
+      return alloc;
+    }
+
+    // 精算計算：各人の支払い・負担・差額、そして送金回数を最小化した精算リスト
+    function computeSettlement(members, expenses, useWeights) {
+      const paid = {};
+      const share = {};
+      members.forEach((m) => { paid[m.id] = 0; share[m.id] = 0; });
+
+      expenses.forEach((exp) => {
+        if (paid[exp.payerId] !== undefined) paid[exp.payerId] += exp.amount;
+
+        const parts = exp.participantIds
+          .map((id) => members.find((m) => m.id === id))
+          .filter(Boolean)
+          .map((m) => ({ id: m.id, weight: useWeights ? (m.weight || 1) : 1 }));
+        if (parts.length === 0) return;
+
+        const alloc = allocate(exp.amount, parts);
+        parts.forEach((p, idx) => { share[p.id] += alloc[idx]; });
+      });
+
+      const balances = members.map((m) => ({
+        id: m.id,
+        name: m.name,
+        paid: paid[m.id],
+        share: share[m.id],
+        net: paid[m.id] - share[m.id],
+      }));
+
+      // グリーディに債務者(net<0)と債権者(net>0)を突き合わせる
+      const debtors = balances
+        .filter((b) => b.net < 0)
+        .map((b) => ({ name: b.name, remaining: -b.net }))
+        .sort((a, b) => b.remaining - a.remaining);
+      const creditors = balances
+        .filter((b) => b.net > 0)
+        .map((b) => ({ name: b.name, remaining: b.net }))
+        .sort((a, b) => b.remaining - a.remaining);
+
+      const transfers = [];
+      let di = 0, ci = 0;
+      while (di < debtors.length && ci < creditors.length) {
+        const d = debtors[di], c = creditors[ci];
+        const amt = Math.min(d.remaining, c.remaining);
+        if (amt > 0) transfers.push({ from: d.name, to: c.name, amount: amt });
+        d.remaining -= amt;
+        c.remaining -= amt;
+        if (d.remaining === 0) di++;
+        if (c.remaining === 0) ci++;
+      }
+
+      const total = expenses.reduce((s, e) => s + e.amount, 0);
+      return { balances, transfers, total };
+    }
+
+    function WarikanApp() {
+      const [parties, setParties] = useState([]);
+      const [activeId, setActiveId] = useState(null);
+      const [loaded, setLoaded] = useState(false);
+
+      // 入力フォーム
+      const [memberName, setMemberName] = useState('');
+      const [payerId, setPayerId] = useState('');
       const [amount, setAmount] = useState('');
-      const [payer, setPayer] = useState('');
+      const [description, setDescription] = useState('');
+      const [selected, setSelected] = useState([]); // 対象メンバーID
+      const [toast, setToast] = useState('');
+      const toastTimer = useRef(null);
 
+      // 読み込み（旧フォーマットからの移行も対応）
       useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          setDrinks(JSON.parse(saved));
-        }
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const data = JSON.parse(raw);
+            if (Array.isArray(data.parties)) {
+              setParties(data.parties);
+              const ok = data.activeId && data.parties.some((p) => p.id === data.activeId);
+              setActiveId(ok ? data.activeId : null);
+            } else if (data.members || data.expenses) {
+              // 旧：単一セッション形式 → 1件の飲み会として移行
+              const migrated = {
+                id: 'p' + Date.now(),
+                title: '',
+                date: todayStr(),
+                members: data.members || [],
+                expenses: data.expenses || [],
+                useWeights: !!data.useWeights,
+              };
+              setParties([migrated]);
+              setActiveId(migrated.id);
+            }
+          }
+        } catch (e) { /* ignore */ }
+        setLoaded(true);
       }, []);
 
+      // 保存（変更のたびに自動保存）
       useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(drinks));
-      }, [drinks]);
+        if (!loaded) return;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ parties, activeId }));
+      }, [parties, activeId, loaded]);
 
-      const addDrink = (e) => {
-        e.preventDefault();
-        if (!location.trim() || !people.trim() || drinks.length >= MAX_DRINKS) return;
+      const active = parties.find((p) => p.id === activeId) || null;
 
-        const newDrink = {
-          id: Date.now(),
-          date: new Date().toLocaleDateString('ja-JP'),
-          location: location.trim(),
-          people: people.trim(),
-          amount: amount ? parseInt(amount) : 0,
-          payer: payer.trim()
-        };
-
-        setDrinks([newDrink, ...drinks]);
-        setLocation('');
-        setPeople('');
+      // 飲み会を切り替えたらフォームを初期化
+      useEffect(() => {
+        setSelected(active ? active.members.map((m) => m.id) : []);
+        setPayerId('');
         setAmount('');
-        setPayer('');
+        setDescription('');
+        setMemberName('');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [activeId]);
+
+      const showToast = (msg) => {
+        setToast(msg);
+        if (toastTimer.current) clearTimeout(toastTimer.current);
+        toastTimer.current = setTimeout(() => setToast(''), 2000);
       };
 
-      const deleteDrink = (id) => {
-        setDrinks(drinks.filter(drink => drink.id !== id));
+      // アクティブな飲み会を更新
+      const updateActive = (patch) => {
+        setParties((prev) =>
+          prev.map((p) =>
+            p.id === activeId ? { ...p, ...(typeof patch === 'function' ? patch(p) : patch) } : p
+          )
+        );
       };
 
-      const totalAmount = drinks.reduce((sum, drink) => sum + (drink.amount || 0), 0);
-      const progress = (drinks.length / MAX_DRINKS) * 100;
-      const isComplete = drinks.length >= MAX_DRINKS;
+      // --- 飲み会（一覧）操作 ---
+      const createParty = () => {
+        const np = {
+          id: 'p' + Date.now(),
+          title: '',
+          date: todayStr(),
+          members: [],
+          expenses: [],
+          useWeights: false,
+        };
+        setParties((prev) => [np, ...prev]);
+        setActiveId(np.id);
+      };
 
+      const openParty = (id) => setActiveId(id);
+      const backToList = () => setActiveId(null);
+
+      const deleteParty = (id, fromEditor) => {
+        const p = parties.find((x) => x.id === id);
+        const name = (p && p.title) || '無題の飲み会';
+        if (!window.confirm('「' + name + '」を削除します。よろしいですか？')) return;
+        setParties((prev) => prev.filter((x) => x.id !== id));
+        if (activeId === id) setActiveId(null);
+      };
+
+      // --- メンバー操作 ---
+      const addMember = (e) => {
+        e.preventDefault();
+        const name = memberName.trim();
+        if (!name || !active) return;
+        if (active.members.some((m) => m.name === name)) {
+          showToast('同じ名前のメンバーがいます');
+          return;
+        }
+        const nm = { id: 'm' + Date.now(), name, weight: 1 };
+        updateActive((p) => ({ members: [...p.members, nm] }));
+        setSelected((prev) => [...prev, nm.id]);
+        setMemberName('');
+      };
+
+      const removeMember = (id) => {
+        updateActive((p) => ({
+          members: p.members.filter((m) => m.id !== id),
+          expenses: p.expenses
+            .filter((exp) => exp.payerId !== id)
+            .map((exp) => ({
+              ...exp,
+              participantIds: exp.participantIds.filter((pid) => pid !== id),
+            })),
+        }));
+        setSelected((prev) => prev.filter((x) => x !== id));
+        if (payerId === id) setPayerId('');
+      };
+
+      const setWeight = (id, value) => {
+        const w = parseFloat(value);
+        updateActive((p) => ({
+          members: p.members.map((m) => (m.id === id ? { ...m, weight: isNaN(w) ? 0 : w } : m)),
+        }));
+      };
+
+      const toggleSelected = (id) => {
+        setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+      };
+
+      // --- 支払い操作 ---
+      const addExpense = (e) => {
+        e.preventDefault();
+        const amt = parseInt(amount, 10);
+        if (!active || !payerId || !amt || amt <= 0 || selected.length === 0) return;
+        const newExpense = {
+          id: 'e' + Date.now(),
+          payerId,
+          amount: amt,
+          description: description.trim(),
+          participantIds: [...selected],
+        };
+        updateActive((p) => ({ expenses: [newExpense, ...p.expenses] }));
+        setAmount('');
+        setDescription('');
+        setSelected(active.members.map((m) => m.id));
+      };
+
+      const removeExpense = (id) => {
+        updateActive((p) => ({ expenses: p.expenses.filter((exp) => exp.id !== id) }));
+      };
+
+      const memberName_ = (id) => {
+        if (!active) return '';
+        const m = active.members.find((mm) => mm.id === id);
+        return m ? m.name : '（削除済み）';
+      };
+
+      const result = useMemo(
+        () =>
+          active
+            ? computeSettlement(active.members, active.expenses, active.useWeights)
+            : { balances: [], transfers: [], total: 0 },
+        [active]
+      );
+
+      const perPerson =
+        active && active.members.length > 0 ? result.total / active.members.length : 0;
+
+      const copyResult = () => {
+        if (!active) return;
+        const lines = [];
+        lines.push('🍻 ' + (active.title || '飲み会') + ' の精算');
+        lines.push('合計 ' + yen(result.total) + '（' + active.members.length + '人）');
+        lines.push('');
+        if (result.transfers.length === 0) {
+          lines.push('精算不要（差額なし）');
+        } else {
+          lines.push('― 精算 ―');
+          result.transfers.forEach((t) => {
+            lines.push(t.from + ' → ' + t.to + '　' + yen(t.amount));
+          });
+        }
+        const text = lines.join('\n');
+        const done = () => showToast('精算結果をコピーしました');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, () => showToast('コピーに失敗しました'));
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); done(); } catch (e) { showToast('コピーに失敗しました'); }
+          document.body.removeChild(ta);
+        }
+      };
+
+      const canAddExpense = active && payerId && parseInt(amount, 10) > 0 && selected.length > 0;
+
+      // ============ 一覧ビュー ============
+      if (!active) {
+        return (
+          <div className="container">
+            <div className="header">
+              <h1>🍻 わりかん</h1>
+              <p>飲み会の支払いを記録して、かんたん精算</p>
+            </div>
+
+            <div className="card">
+              <h2>📚 保存した飲み会 <span className="count">{parties.length}件</span></h2>
+              <button className="btn btn-block" onClick={createParty}>
+                ＋ 新しい飲み会をはじめる
+              </button>
+
+              {parties.length === 0 ? (
+                <div className="empty-state">
+                  まだ保存された飲み会はありません。<br />
+                  上のボタンから最初の飲み会をつくりましょう！
+                </div>
+              ) : (
+                <ul className="party-list">
+                  {parties.map((p) => {
+                    const total = p.expenses.reduce((s, e) => s + e.amount, 0);
+                    return (
+                      <li key={p.id} className="party-item">
+                        <div className="party-main" onClick={() => openParty(p.id)}>
+                          <div className="party-title">{p.title || '無題の飲み会'}</div>
+                          <div className="party-sub">
+                            📅 {p.date} ・ 👥 {p.members.length}人 ・ 合計 {yen(total)}
+                          </div>
+                        </div>
+                        <button className="btn btn-ghost party-open" onClick={() => openParty(p.id)}>
+                          開く
+                        </button>
+                        <button
+                          className="icon-btn"
+                          onClick={() => deleteParty(p.id)}
+                          title="削除"
+                          aria-label="この飲み会を削除"
+                        >
+                          ×
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      // ============ 編集ビュー ============
       return (
         <div className="container">
           <div className="header">
-            <h1>🍺 Michi Meter</h1>
-            <p>みちひろのハノイ駐在まで、あと何回飲める？</p>
+            <h1>🍻 わりかん</h1>
+            <p>飲み会の支払いを記録して、かんたん精算</p>
+          </div>
+          <div className="autosave-note">✓ 変更は自動で保存されます</div>
+
+          {/* 会の情報 */}
+          <div className="card">
+            <button className="btn btn-ghost back-btn" onClick={backToList}>
+              ← 一覧へ
+            </button>
+            <label>会の名前</label>
+            <input
+              type="text"
+              value={active.title}
+              onChange={(e) => updateActive({ title: e.target.value })}
+              placeholder="例：歓迎会・忘年会"
+            />
+            <div className="party-date">📅 {active.date}</div>
           </div>
 
-          <div className="progress-section">
-            <div className="journey">
-              <div className="journey-path"></div>
-              <div className="journey-progress" style={{ width: `${progress}%` }}></div>
-              <div className="location location-tokyo">🗼</div>
-              <div className="location location-hanoi">🏯</div>
-              <div className="airplane" style={{ left: `calc(${progress}% - 20px)` }}>✈️</div>
-            </div>
-
-            <div className="stats">
-              <div className="stat-card">
-                <div className="stat-number">{drinks.length}</div>
-                <div className="stat-label">飲んだ回数</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number">{MAX_DRINKS - drinks.length}</div>
-                <div className="stat-label">残り回数</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number">¥{totalAmount.toLocaleString()}</div>
-                <div className="stat-label">総額</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number">{Math.round(progress)}%</div>
-                <div className="stat-label">ハノイまで</div>
-              </div>
-            </div>
-
-            {isComplete && (
-              <div className="arrival-message">
-                🎉 ハノイ到着！みちひろ、いってらっしゃい！ 🎉
-              </div>
-            )}
-          </div>
-
-          {!isComplete && (
-            <div className="add-section">
-              <h2>🍻 飲み会を記録</h2>
-              <form onSubmit={addDrink}>
-                <div className="form-group">
-                  <label>場所</label>
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="例：渋谷の居酒屋"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>誰と飲んだ？</label>
-                  <input
-                    type="text"
-                    value={people}
-                    onChange={(e) => setPeople(e.target.value)}
-                    placeholder="例：みちひろ、太郎、花子"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>金額（円）</label>
-                  <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder="例：5000"
-                    min="0"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>精算者（ごとうへの支払い）</label>
-                  <input
-                    type="text"
-                    value={payer}
-                    onChange={(e) => setPayer(e.target.value)}
-                    placeholder="例：ごとう"
-                  />
-                </div>
-                <button type="submit" className="btn">
-                  🍺 記録する（残り{MAX_DRINKS - drinks.length}回）
+          {/* メンバー */}
+          <div className="card">
+            <h2>👥 メンバー <span className="count">{active.members.length}人</span></h2>
+            <form onSubmit={addMember}>
+              <div className="row">
+                <input
+                  type="text"
+                  value={memberName}
+                  onChange={(e) => setMemberName(e.target.value)}
+                  placeholder="名前を入力（例：たろう）"
+                  aria-label="メンバー名"
+                />
+                <button type="submit" className="btn btn-add" disabled={!memberName.trim()}>
+                  ＋ 追加
                 </button>
-              </form>
-            </div>
-          )}
-
-          <div className="history-section">
-            <h2>📝 飲み会の記録</h2>
-            {drinks.length === 0 ? (
-              <div className="empty-state">
-                まだ記録がありません。最初の一杯を記録しましょう！
               </div>
+            </form>
+
+            {active.members.length === 0 ? (
+              <div className="empty-state">まずは参加メンバーを追加しましょう</div>
             ) : (
-              <ul className="history-list">
-                {drinks.map((drink, index) => (
-                  <li key={drink.id} className="history-item">
-                    <div className="history-date">
-                      #{drinks.length - index} - {drink.date}
-                    </div>
-                    <div className="history-details">
-                      📍 {drink.location}
-                      {drink.amount > 0 && (
-                        <span className="amount-badge">¥{drink.amount.toLocaleString()}</span>
-                      )}
-                      {drink.payer && (
-                        <span className="payer-badge">💰 {drink.payer}</span>
-                      )}
-                    </div>
-                    <div className="history-people">
-                      👥 {drink.people}
-                    </div>
+              <ul className="member-list">
+                {active.members.map((m) => (
+                  <li key={m.id} className="member-item">
+                    <span className="member-name">{m.name}</span>
+                    {active.useWeights && (
+                      <React.Fragment>
+                        <input
+                          className="weight"
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          value={m.weight}
+                          onChange={(e) => setWeight(m.id, e.target.value)}
+                          aria-label={m.name + 'の負担割合'}
+                        />
+                        <span className="weight-suffix">倍</span>
+                      </React.Fragment>
+                    )}
                     <button
-                      className="delete-btn"
-                      onClick={() => deleteDrink(drink.id)}
+                      className="icon-btn"
+                      onClick={() => removeMember(m.id)}
+                      title="削除"
+                      aria-label={m.name + 'を削除'}
                     >
-                      削除
+                      ×
                     </button>
                   </li>
                 ))}
               </ul>
             )}
+
+            {active.members.length > 0 && (
+              <label className="toggle-line">
+                <input
+                  type="checkbox"
+                  checked={active.useWeights}
+                  onChange={(e) => updateActive({ useWeights: e.target.checked })}
+                />
+                傾斜配分を使う（上司は多め・幹事は少なめ など）
+              </label>
+            )}
           </div>
+
+          {/* 支払い */}
+          {active.members.length > 0 && (
+            <div className="card">
+              <h2>💴 支払いを追加</h2>
+              <form onSubmit={addExpense}>
+                <div className="form-group">
+                  <label>誰が払った？</label>
+                  <select value={payerId} onChange={(e) => setPayerId(e.target.value)}>
+                    <option value="">選択してください</option>
+                    {active.members.map((m) => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="row">
+                  <div className="form-group">
+                    <label>金額（円）</label>
+                    <input
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="例：12000"
+                      min="1"
+                      inputMode="numeric"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>項目（任意）</label>
+                    <input
+                      type="text"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="例：1次会・居酒屋"
+                    />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>
+                    割り勘の対象
+                    <button
+                      type="button"
+                      className="chip-mini"
+                      style={{ marginLeft: 10 }}
+                      onClick={() => setSelected(active.members.map((m) => m.id))}
+                    >
+                      全員
+                    </button>
+                    <button
+                      type="button"
+                      className="chip-mini"
+                      onClick={() => setSelected([])}
+                    >
+                      クリア
+                    </button>
+                  </label>
+                  <div className="chips">
+                    {active.members.map((m) => (
+                      <span
+                        key={m.id}
+                        className={'chip' + (selected.includes(m.id) ? ' on' : '')}
+                        onClick={() => toggleSelected(m.id)}
+                      >
+                        {m.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <button type="submit" className="btn btn-block" disabled={!canAddExpense}>
+                  ＋ この支払いを記録
+                </button>
+              </form>
+
+              {active.expenses.length > 0 && (
+                <ul className="expense-list">
+                  {active.expenses.map((exp) => (
+                    <li key={exp.id} className="expense-item">
+                      <div className="expense-main">
+                        <div className="expense-title">
+                          <span>{exp.description || '支払い'}</span>
+                          <span className="expense-amount">{yen(exp.amount)}</span>
+                        </div>
+                        <div className="expense-sub">
+                          💳 {memberName_(exp.payerId)} が支払い ／ 対象{' '}
+                          {exp.participantIds.length === active.members.length
+                            ? '全員'
+                            : exp.participantIds.map(memberName_).join('・')}
+                        </div>
+                      </div>
+                      <button
+                        className="icon-btn"
+                        onClick={() => removeExpense(exp.id)}
+                        title="削除"
+                        aria-label="この支払いを削除"
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {/* 精算結果 */}
+          {active.members.length > 0 && active.expenses.length > 0 && (
+            <div className="card">
+              <h2>🧮 精算結果</h2>
+              <div className="summary">
+                <div className="summary-card">
+                  <div className="summary-num">{yen(result.total)}</div>
+                  <div className="summary-label">合計金額</div>
+                </div>
+                <div className="summary-card">
+                  <div className="summary-num">{active.members.length}人</div>
+                  <div className="summary-label">参加人数</div>
+                </div>
+                <div className="summary-card">
+                  <div className="summary-num">{yen(perPerson)}</div>
+                  <div className="summary-label">1人あたり平均</div>
+                </div>
+              </div>
+
+              <table className="balance-table">
+                <thead>
+                  <tr>
+                    <th>メンバー</th>
+                    <th>支払った</th>
+                    <th>負担額</th>
+                    <th>差額</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.balances.map((b) => (
+                    <tr key={b.id}>
+                      <td>{b.name}</td>
+                      <td>{yen(b.paid)}</td>
+                      <td>{yen(b.share)}</td>
+                      <td className={b.net > 0 ? 'net-plus' : b.net < 0 ? 'net-minus' : 'net-zero'}>
+                        {b.net > 0 ? '+' + yen(b.net) : b.net < 0 ? '-' + yen(-b.net) : yen(0)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="settle-title">💸 精算方法（送金は最小回数）</div>
+              {result.transfers.length === 0 ? (
+                <div className="settle-done">🎉 精算の必要はありません！</div>
+              ) : (
+                <ul className="settle-list">
+                  {result.transfers.map((t, i) => (
+                    <li key={i} className="settle-item">
+                      <span className="settle-from">{t.from}</span>
+                      <span className="settle-arrow">→</span>
+                      <span>{t.to}</span>
+                      <span className="settle-amount">{yen(t.amount)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="footer-actions">
+                <button className="btn" onClick={copyResult}>📋 結果をコピー</button>
+              </div>
+            </div>
+          )}
+
+          {/* この飲み会を削除 */}
+          <div className="footer-actions">
+            <button className="btn btn-ghost btn-block" onClick={() => deleteParty(active.id)}>
+              🗑 この飲み会を削除
+            </button>
+          </div>
+
+          {toast && <div className="toast">{toast}</div>}
         </div>
       );
     }
 
-    ReactDOM.render(<MichiMeter />, document.getElementById('root'));
+    ReactDOM.render(<WarikanApp />, document.getElementById('root'));
   </script>
 </body>
 </html>
-
